@@ -4,6 +4,10 @@
 // add systems
 
 
+// Constants
+pub const  GRAVITY: f32 = 1.0;
+pub const FRAME_RATE: f32 = 1.0 / 60.0;
+
 
 use bevy::prelude::*;
 
