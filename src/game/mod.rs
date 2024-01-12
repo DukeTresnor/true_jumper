@@ -4,12 +4,27 @@
 // add systems
 
 
+
+
+// Mod Statements
+pub mod resources;
+mod systems;
+mod components;
+
+
+// Using
+use bevy::prelude::*;
+use crate::AppState;
+
+use self::{systems::*, resources::AdvanceOneFrameMode};
+
+
 // Constants
-pub const  GRAVITY: f32 = 1.0;
+pub const GRAVITY: f32 = 1.0;
 pub const FRAME_RATE: f32 = 1.0 / 60.0;
 
 
-use bevy::prelude::*;
+
 
 // Implementation for GamePlugin. Add any states, systems, plugins, or init any resources that are
 //   meant to take place within the game itself (not menus) should go here.
@@ -17,7 +32,15 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app
+            .init_resource::<AdvanceOneFrameMode>()
             .add_state::<SimulationState>()
+            .add_systems(OnEnter(AppState::Game), pause_simulation)
+
+            .add_systems(Update, toggle_simulation_state.run_if(in_state(AppState::Game)))
+            .add_systems(Update, advance_one_frame.run_if(in_state(AppState::Game)))
+
+            .add_systems(OnExit(AppState::Game), resume_simulation)
+
             ;
     }
 }
