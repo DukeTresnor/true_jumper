@@ -10,11 +10,13 @@
 pub mod resources;
 mod systems;
 mod components;
+mod player;
 
 
 // Using
 use bevy::prelude::*;
 use crate::AppState;
+use player::PlayerPlugin;
 
 use self::{systems::*, resources::AdvanceOneFrameMode};
 
@@ -34,10 +36,14 @@ impl Plugin for GamePlugin {
         app
             .init_resource::<AdvanceOneFrameMode>()
             .add_state::<SimulationState>()
+            .add_plugins(PlayerPlugin)
             .add_systems(OnEnter(AppState::Game), pause_simulation)
 
             .add_systems(Update, toggle_simulation_state.run_if(in_state(AppState::Game)))
             .add_systems(Update, advance_one_frame.run_if(in_state(AppState::Game)))
+
+            // Debug systems
+            .add_systems(Update, debug_json_read_write.run_if(in_state(AppState::Game)))
 
             .add_systems(OnExit(AppState::Game), resume_simulation)
 
