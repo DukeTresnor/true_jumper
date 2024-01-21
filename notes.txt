@@ -1,0 +1,28 @@
+1/12/24
+    Trying to make an actual platformer
+    Json
+        I have something here
+        create a struct definition that derives Serialized and Deserialized
+            `this struct should have the necessary info for the level, character, hitboxes, sprites, etc.
+        read from a json file (using the fs library) to a string with:
+            fs::read_to_string(path to the json file)
+        create a mutable instance of your Serialized, Deserialized struct from your json string with:
+            serde_json::from_str( reference to your json string)
+        change whatever data you want
+        reserialize the struct instance into a string with:
+            serde_json::to_string(reference to your struct instance)
+        write your string into the original json file with
+            fs::write(path, data)
+
+1/20/24
+    File path at the moment is dependant on my current location, since I'm using ./stuff/more_stuff. Try using an absolute filename
+        Solution worked, but will need to make this more general if I'm to have it run on other computers?
+    Following logic from 1/12, we want to
+        string = fs::read_to_string( path )                             <-- Read from json file
+        json_structure: JsonTest = serde_json::from_str( &string )      <-- 
+        json_structure.aspect = updated value
+        updated_string = serde_json::to_string( &json_structure )
+        ...
+    I redid some stuff, got it to work! It does mess up the formatting of my json files though, but I think this is ok
+    
+
