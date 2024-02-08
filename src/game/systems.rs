@@ -1,15 +1,22 @@
 // game / system.rs
 
 use std::fs;
+use std::thread::current;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, animation};
 use serde_json::{Result, Value};
 use serde::{Deserialize, Serialize};
 
 use crate::game::SimulationState;
 use crate::game::resources::AdvanceOneFrameMode;
+use crate::resources::MouseCursorWorldCoordinates;
 
 
+
+use super::components::*;
+use super::player::components::*;
+
+// Edit out later
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct JsonTest {
@@ -53,7 +60,64 @@ pub fn toggle_simulation_state(
             println!("Simulation Paused");
         }
     }
+
+    if keyboard_input.just_pressed(KeyCode::D) {
+        if simulation_state.get() == &SimulationState::Paused {
+            // Enter Draw state
+            next_simulation_state.set(SimulationState::Draw);
+            println!("Entering Draw State");
+        }
+        if simulation_state.get() == &SimulationState::Draw {
+            // Return to Paused State
+            next_simulation_state.set(SimulationState::Paused);
+            println!("Simulation return to Paused");
+        }
+    }
+
 }
+
+// CurrentSpriteSheetIndices
+// work on
+pub fn animate_sprite(
+    time: Res<Time>,
+    mut animation_query: Query<(&CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
+) {
+    for (current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas_sprite) in animation_query.iter_mut() {
+        animation_timer.tick(time.delta());
+
+
+
+        if animation_timer.just_finished() { // ie after every 1/60 seconds, ie after every frame
+            if texture_atlas_sprite.index == current_sprite_sheet_indices.current_last {
+                
+                
+                // if you're walking, you should loop walking animation
+                if current_sprite_sheet_indices.looping {
+                    texture_atlas_sprite.index = current_sprite_sheet_indices.current_first;
+                }
+
+                // if you're doing anything else, the end of an animation should bring you back to the idle animation
+                if !current_sprite_sheet_indices.looping {
+                    // add what to do if the current animation is not a looping one -- we should go back to idle
+                    texture_atlas_sprite.index = player_sprite_sheet_indices.idle_first;
+                }
+                
+
+                // Also send an animation::end event
+
+            } else {
+                texture_atlas_sprite.index += 1;
+
+                //println!("fn animate_sprite: current index: {}", texture_atlas_sprite.index);
+            }
+        }
+    }
+}
+
+
+
+
+// ---------- Debug Systems ---------- //
 
 pub fn advance_one_frame(
     mut advance_one_frame_mode: ResMut<AdvanceOneFrameMode>,
@@ -74,8 +138,8 @@ pub fn advance_one_frame(
     } 
 }
 
-// ---------- Debug Systems ---------- //
 
+// Refine, rename
 pub fn debug_json_read_write(
     keyboard_input: Res<Input<KeyCode>>,
     simulation_state: Res<State<SimulationState>>,
@@ -106,6 +170,22 @@ pub fn debug_json_read_write(
     }
 }
 
+
+// not finished
+pub fn draw_hitbox(
+    cursor_coordinates: Res<MouseCursorWorldCoordinates>,
+    mouse_input: Res<Input<MouseButton>>,
+) {
+    let mut starting_box_coordinates: Vec2 = Vec2::new(0.0, 0.0);
+    let mut ending_box_coordinates: Vec2 = Vec2::new(0.0, 0.0);
+
+    if mouse_input.just_pressed(MouseButton::Left) {
+        // get cursor coordinates into starting_box_coordinates
+        starting_box_coordinates.x = cursor_coordinates.0.x;
+        starting_box_coordinates.y = cursor_coordinates.0.y;
+        //println!("fn draw_hitbox: starting_box_coordinates x: {}, starting_box_coordinates y: {}", starting_box_coordinates.x, starting_box_coordinates.y);
+    }
+}
 
 
 // ---------- Debug Systems ---------- //

@@ -10,13 +10,15 @@
 pub mod resources;
 mod systems;
 mod components;
-mod player;
+pub mod player;
 
 
 // Using
 use bevy::prelude::*;
+//use bevy_animations::AnimationsPlugin;
 use crate::AppState;
 use player::PlayerPlugin;
+
 
 use self::{systems::*, resources::AdvanceOneFrameMode};
 
@@ -34,14 +36,28 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app
+            //.add_plugins(AnimationsPlugin {
+            //    pixels_per_meter: 20.
+            //})
             .init_resource::<AdvanceOneFrameMode>()
             .add_state::<SimulationState>()
             .add_plugins(PlayerPlugin)
+
             .add_systems(OnEnter(AppState::Game), pause_simulation)
 
+            .add_systems(
+                Update,
+                animate_sprite
+                
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(SimulationState::Running))
+
+            )
             .add_systems(Update, toggle_simulation_state.run_if(in_state(AppState::Game)))
             .add_systems(Update, advance_one_frame.run_if(in_state(AppState::Game)))
-
+            .add_systems(Update, draw_hitbox
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(SimulationState::Draw)))
             // Debug systems
             .add_systems(Update, debug_json_read_write.run_if(in_state(AppState::Game)))
 
@@ -58,6 +74,7 @@ pub enum SimulationState {
     #[default]
     Running,
     Paused,
+    Draw,
 }
 
 
