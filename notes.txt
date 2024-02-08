@@ -24,5 +24,32 @@
         updated_string = serde_json::to_string( &json_structure )
         ...
     I redid some stuff, got it to work! It does mess up the formatting of my json files though, but I think this is ok
-    
+
+1/21/24
+    working on including bevy_animation crate
+    issue with initial examples, not sure what values to use for specific parameters
+        animation.insert_animations() call, with frame parameter:
+            sprite doesn't show with 1, 1 as values, but I get an error at higher values (out of index bound error)
+        when frame is set to Vec2 --> 0.0, 0.0, my spritesheet shows up, but it provides the entire sheet, and doesn't load the specific frame and loop through.
+            do I need to provide it with an aseprite animation or something like that? ie, do I need to provide it with 4 images instead of a spritesheet with 4 portions of the idle animation?
+
+        other thing i want to check is if I can properly pick up the animation event, as im currently using an event writer
+            ie, what shoud i do for impleneting event readers? what logic do I want?
+        
+2/7/24
+    decided to go back to my original animation implementation
+    working on hitbox draw system
+        got world coordinates for the mouse cursor
+        have a system (draw_hitbox) that stores the current mouse coordinates after entering the Draw state and left
+            clicking.
+        next step is to provide logic and directions to the user to click a second time, store that value, and use your
+            two stored coordinates to update the hitbox information for your sprite
+        the idea would be for your draw_hitbox system to eventually modify a json file that contains the sprite's hitbox data
+        ---important step:---
+            when you have the two coordinates as Vec2's, you need to convert them again into coordinates relative to the sprite's
+                transform
+
+    implemented a resource to store the cursor's world position, but this is implemented with Default / a bare bones
+        implementation. I might want to refine the resource (in src/resources.rs) so that it has named parameters instead
+            of just storing a Vec2
 
