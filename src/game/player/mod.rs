@@ -11,9 +11,9 @@ use bevy::prelude::*;
 use crate::AppState;
 use systems::*;
 
-use self::resources::PlayerSpriteSheetData;
+use self::resources::{PlayerSpriteSheetData, PlayerHitboxData};
 
-use super::SimulationState;
+use super::{SimulationState, resources::DrawnHitboxCoordinates};
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
@@ -22,7 +22,9 @@ impl Plugin for PlayerPlugin {
             //.add_state::<MovementState>()
             //.add_state::<AttackState>()
             .init_resource::<PlayerSpriteSheetData>()
+            .init_resource::<PlayerHitboxData>()
             .add_systems(OnEnter(AppState::Game), populate_player_sprite_sheet_indeces.before(spawn_player))
+            .add_systems(OnEnter(AppState::Game), populate_player_hitbox_data.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), spawn_player)
             .add_systems(Update, 
                 (

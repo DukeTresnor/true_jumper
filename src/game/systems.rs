@@ -15,6 +15,7 @@ use crate::resources::MouseCursorWorldCoordinates;
 
 use super::components::*;
 use super::player::components::*;
+use super::resources::DrawnHitboxCoordinates;
 
 // Edit out later
 #[derive(Serialize, Deserialize, Debug)]
@@ -171,21 +172,62 @@ pub fn debug_json_read_write(
 }
 
 
-// not finished
+// needs to send an event
 pub fn draw_hitbox(
     cursor_coordinates: Res<MouseCursorWorldCoordinates>,
     mouse_input: Res<Input<MouseButton>>,
+    mut drawn_hitbox_coordinates: ResMut<DrawnHitboxCoordinates>,
+    player_query: Query<&Transform, With<Player>>,
 ) {
-    let mut starting_box_coordinates: Vec2 = Vec2::new(0.0, 0.0);
-    let mut ending_box_coordinates: Vec2 = Vec2::new(0.0, 0.0);
 
     if mouse_input.just_pressed(MouseButton::Left) {
-        // get cursor coordinates into starting_box_coordinates
-        starting_box_coordinates.x = cursor_coordinates.0.x;
-        starting_box_coordinates.y = cursor_coordinates.0.y;
-        //println!("fn draw_hitbox: starting_box_coordinates x: {}, starting_box_coordinates y: {}", starting_box_coordinates.x, starting_box_coordinates.y);
+        drawn_hitbox_coordinates.starting_coordinates.x = cursor_coordinates.0.x;
+        drawn_hitbox_coordinates.starting_coordinates.y = cursor_coordinates.0.y;
+    }
+
+    if mouse_input.just_released(MouseButton::Left) {
+        drawn_hitbox_coordinates.ending_coordinates.x = cursor_coordinates.0.x;
+        drawn_hitbox_coordinates.ending_coordinates.y = cursor_coordinates.0.y;
+
+        //println!("fn draw_hitbox: starting_box_coordinates x: {}, starting_box_coordinates y: {}", drawn_hitbox_coordinates.starting_coordinates.x, drawn_hitbox_coordinates.starting_coordinates.y);
+        //println!("fn draw_hitbox: ending_box_coordinates x: {}, ending_box_coordinates y: {}", drawn_hitbox_coordinates.ending_coordinates.x, drawn_hitbox_coordinates.ending_coordinates.y);
+    
+
+        for player_transform in player_query.iter() {
+            println!("fn draw_hitbox: player_transform: x_coordinate: {}, y_coordinate: {}", player_transform.translation.x, player_transform.translation.y);
+        
+            // calculate the x and y coordinates of the starting and ending positions of the drawn hitboxes relative to the player's position
+            drawn_hitbox_coordinates.starting_coordinates_relative_to_player.x = drawn_hitbox_coordinates.starting_coordinates.x - player_transform.translation.x;
+            drawn_hitbox_coordinates.starting_coordinates_relative_to_player.y = drawn_hitbox_coordinates.starting_coordinates.y - player_transform.translation.y;
+            drawn_hitbox_coordinates.ending_coordinates_relative_to_player.x = drawn_hitbox_coordinates.ending_coordinates.x - player_transform.translation.x;
+            drawn_hitbox_coordinates.ending_coordinates_relative_to_player.y = drawn_hitbox_coordinates.ending_coordinates.y - player_transform.translation.y;
+
+            // send a drawn hitbox event
+
+        }
+    
     }
 }
+
+
+pub fn debug_display_game_resources(
+    simulation_state: Res<State<SimulationState>>,
+    advance_one_frame_resource: Res<AdvanceOneFrameMode>,
+    drawn_hitbox_coordinates: Res<DrawnHitboxCoordinates>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    if simulation_state.get() == &SimulationState::Paused {
+        if keyboard_input.just_pressed(KeyCode::L) {
+            println!("fn debug_display_game_resources: should_advance_one_frame: {}, frame_timer: {:?}", advance_one_frame_resource.should_advance_one_frame, advance_one_frame_resource.frame_timer);
+            println!("fn debug_display_game_resources: starting_coordinates: {}, ending_coordinates: {}, starting_coordinates_relative_to_player: {}, ending_coordinates_relative_to_player: {}", 
+                drawn_hitbox_coordinates.starting_coordinates, 
+                drawn_hitbox_coordinates.ending_coordinates, 
+                drawn_hitbox_coordinates.starting_coordinates_relative_to_player, 
+                drawn_hitbox_coordinates.ending_coordinates_relative_to_player);
+        }
+    }
+}
+
 
 
 // ---------- Debug Systems ---------- //

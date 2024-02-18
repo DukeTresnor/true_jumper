@@ -15,12 +15,11 @@ pub mod player;
 
 // Using
 use bevy::prelude::*;
-//use bevy_animations::AnimationsPlugin;
 use crate::AppState;
 use player::PlayerPlugin;
 
 
-use self::{systems::*, resources::AdvanceOneFrameMode};
+use self::{systems::*, resources::*};
 
 
 // Constants
@@ -40,6 +39,7 @@ impl Plugin for GamePlugin {
             //    pixels_per_meter: 20.
             //})
             .init_resource::<AdvanceOneFrameMode>()
+            .init_resource::<DrawnHitboxCoordinates>()
             .add_state::<SimulationState>()
             .add_plugins(PlayerPlugin)
 
@@ -55,6 +55,12 @@ impl Plugin for GamePlugin {
             )
             .add_systems(Update, toggle_simulation_state.run_if(in_state(AppState::Game)))
             .add_systems(Update, advance_one_frame.run_if(in_state(AppState::Game)))
+            .add_systems(
+                Update,
+                debug_display_game_resources
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(SimulationState::Paused))
+            )
             .add_systems(Update, draw_hitbox
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(SimulationState::Draw)))

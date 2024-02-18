@@ -38,7 +38,7 @@
         
 2/7/24
     decided to go back to my original animation implementation
-    working on hitbox draw system
+    working on hitbox draw system using this set of tasks -- https://www.reddit.com/r/bevy/comments/13ogm9q/anyone_have_any_examples_of_box_selecting/
         got world coordinates for the mouse cursor
         have a system (draw_hitbox) that stores the current mouse coordinates after entering the Draw state and left
             clicking.
@@ -53,3 +53,12 @@
         implementation. I might want to refine the resource (in src/resources.rs) so that it has named parameters instead
             of just storing a Vec2
 
+2/18/24
+    did some work on drawn hitbox coordinates system.
+        still needs to send an event once I release the mouse
+
+    added a debug system to display the game resources --> press L during paused state
+        implement one that displays the player resources as well
+        when entering paused, print out your available hotkeys so you don't get lost
+    
+    should try to implement event handling next

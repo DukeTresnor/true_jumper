@@ -35,6 +35,7 @@ pub fn populate_player_sprite_sheet_indeces(
     mut player_sprite_sheet_data: ResMut<PlayerSpriteSheetData>,
 ) {
 
+    // path to json data
     let path = "/Users/bradfordarmstrong/Projects/rust_space/bevy_games/true_jumper/src/game/player/json_data/player_sprite_sheet_indices.json";
 
     let file_data = fs::read_to_string(path)
@@ -61,6 +62,28 @@ pub fn populate_player_sprite_sheet_indeces(
 
 }
 
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct JsonHitboxData {
+    idle_box_upper_x: usize,
+    idle_box_upper_y: usize,
+    idle_box_lower_x: usize,
+    idle_box_lower_y: usize,
+    attack_box_upper_x: usize,
+    attack_box_upper_y: usize,
+    attack_box_lower_x: usize,
+    attack_box_lower_y: usize,
+}
+
+// this system should work similarly to populate_player_sprite_sheet_indeces, in that it should pull data from a json file
+//   and populate the player with the proper hitbox data
+pub fn populate_player_hitbox_data(
+
+) {
+
+}
 
 
 pub fn spawn_player(
@@ -134,7 +157,7 @@ pub fn spawn_player(
                 is_dashing: false,
                 is_attacking: false,
             },
-            PlayeraAttackState {
+            PlayerAttackState {
                 is_attacking: false,
             },
             starting_sprite_sheet_indices,
@@ -190,6 +213,15 @@ pub fn input_handling(
 }
 
 
+// constantly checks for the ending of an animation for an attack / projectile that comes from the player
+pub fn despawn_children(
+    // command <-- should take command as a parameter since we are intending to despawn
+) {
+
+}
+
+
+
 /* 
 pub fn move_player(
     mut player_query: Query<(Entity, &mut Transform, &PlayerInput, &mut PlayerMovementState), With<Player>>,
@@ -208,3 +240,12 @@ pub fn move_player(
 
 }
 */
+
+
+
+pub fn player_attack(
+    // command <-- commands needed to spawn attack / projectile once appropriate input is detected and in proper state.
+    //   Might not do this way?
+) {
+
+}

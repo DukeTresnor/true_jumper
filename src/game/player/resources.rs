@@ -24,3 +24,30 @@ impl Default for PlayerSpriteSheetData {
     }
 }
 
+
+#[derive(Resource)]
+pub struct PlayerHitboxData {
+    pub idle_box_upper_x: usize,
+    pub idle_box_upper_y: usize,
+    pub idle_box_lower_x: usize,
+    pub idle_box_lower_y: usize,
+    pub attack_box_upper_x: usize,
+    pub attack_box_upper_y: usize,
+    pub attack_box_lower_x: usize,
+    pub attack_box_lower_y: usize,
+}
+
+impl Default for PlayerHitboxData {
+    fn default() -> PlayerHitboxData {
+        PlayerHitboxData {
+            idle_box_upper_x: 0,
+            idle_box_upper_y: 0,
+            idle_box_lower_x: 0,
+            idle_box_lower_y: 0,
+            attack_box_upper_x: 0,
+            attack_box_upper_y: 0,
+            attack_box_lower_x: 0,
+            attack_box_lower_y: 0,
+        }
+    }
+}

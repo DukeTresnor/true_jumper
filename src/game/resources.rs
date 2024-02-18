@@ -19,3 +19,22 @@ impl  Default for AdvanceOneFrameMode {
         }
     }
 }
+
+#[derive(Resource)]
+pub struct DrawnHitboxCoordinates {
+    pub starting_coordinates: Vec2,
+    pub ending_coordinates: Vec2,
+    pub starting_coordinates_relative_to_player: Vec2,
+    pub ending_coordinates_relative_to_player: Vec2,
+}
+
+impl Default for DrawnHitboxCoordinates {
+    fn default() -> DrawnHitboxCoordinates {
+        DrawnHitboxCoordinates {
+            starting_coordinates: Vec2::ZERO,
+            ending_coordinates: Vec2::ZERO,
+            starting_coordinates_relative_to_player: Vec2::ZERO,
+            ending_coordinates_relative_to_player: Vec2::ZERO,
+        }
+    }
+}

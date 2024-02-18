@@ -34,7 +34,7 @@ pub struct PlayerMovementState {
 }
 
 #[derive(Component)]
-pub struct PlayeraAttackState {
+pub struct PlayerAttackState {
     pub is_attacking: bool,
 }
 
