@@ -7,6 +7,8 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct Player {}
 
+
+// Remove once you implement events
 #[derive(Component)]
 pub struct PlayerInput {
     pub up: bool,
@@ -27,6 +29,7 @@ pub struct  InputBinding {
 
 #[derive(Component)]
 pub struct PlayerMovementState {
+    pub is_idle: bool,
     pub is_grounded: bool,
     pub is_walking: bool,
     pub is_dashing: bool,

@@ -10,12 +10,16 @@ use serde::{Deserialize, Serialize};
 use crate::game::SimulationState;
 use crate::game::resources::AdvanceOneFrameMode;
 use crate::resources::MouseCursorWorldCoordinates;
+use crate::game::events::*;
 
 
 
 use super::components::*;
 use super::player::components::*;
 use super::resources::DrawnHitboxCoordinates;
+
+// ---------- Structs, Enums, Events ---------- //
+
 
 // Edit out later
 #[derive(Serialize, Deserialize, Debug)]
@@ -25,6 +29,11 @@ struct JsonTest {
     gender: String,
     age: i32,
 }
+
+
+// ---------- Structs, Enums, Events ---------- //
+
+
 
 
 pub fn resume_simulation(
@@ -82,11 +91,10 @@ pub fn toggle_simulation_state(
 pub fn animate_sprite(
     time: Res<Time>,
     mut animation_query: Query<(&CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut event_animation_end: EventWriter<AnimationEnd>,
 ) {
     for (current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas_sprite) in animation_query.iter_mut() {
         animation_timer.tick(time.delta());
-
-
 
         if animation_timer.just_finished() { // ie after every 1/60 seconds, ie after every frame
             if texture_atlas_sprite.index == current_sprite_sheet_indices.current_last {
@@ -105,6 +113,10 @@ pub fn animate_sprite(
                 
 
                 // Also send an animation::end event
+                event_animation_end.send(AnimationEnd {
+                    starting_index: current_sprite_sheet_indices.current_first,
+                    ending_index: current_sprite_sheet_indices.current_last,
+                });
 
             } else {
                 texture_atlas_sprite.index += 1;
@@ -115,6 +127,25 @@ pub fn animate_sprite(
     }
 }
 
+
+// modify for animations?
+// for later -->  https://stackoverflow.com/questions/63675140/how-to-read-bevy-events-without-consuming-them
+//I just realized what I was doing wrong. I was using a single global resource EventReader to listen to
+//    the JumpedEvent instances being sent. Each EventReader only reads each event a single time.
+//    What I needed to do instead was to have an individual EventReader for each system that needed to
+//    listen for the event. I did this by using Local EventReaders for each system that needed to listen for the event.
+pub fn event_handler(
+    mut event_animation_end: EventReader<AnimationEnd>,
+) {
+    for event in event_animation_end.read() {
+        //println!("fn event_handler: Animation End: starting index: {}, ending index: {}", event.starting_index, event.ending_index);
+
+        // do something if in idle -- 0 to 11
+        // do something if in atack -- 12 to 18, etc.
+        // not sure
+
+    }
+}
 
 
 
@@ -202,7 +233,9 @@ pub fn draw_hitbox(
             drawn_hitbox_coordinates.ending_coordinates_relative_to_player.x = drawn_hitbox_coordinates.ending_coordinates.x - player_transform.translation.x;
             drawn_hitbox_coordinates.ending_coordinates_relative_to_player.y = drawn_hitbox_coordinates.ending_coordinates.y - player_transform.translation.y;
 
-            // send a drawn hitbox event
+            // send a drawn hitbox event -->
+            //   whenever you release a click during draw mode, send drawn hitbox event to a system that checks for those,
+            //   then have that system add the current values inside the DrawnHitboxCoordinates resource to a json
 
         }
     

@@ -11,6 +11,7 @@ pub mod resources;
 mod systems;
 mod components;
 pub mod player;
+pub mod events;
 
 
 // Using
@@ -19,7 +20,7 @@ use crate::AppState;
 use player::PlayerPlugin;
 
 
-use self::{systems::*, resources::*};
+use self::{systems::*, resources::*, events::*};
 
 
 // Constants
@@ -41,14 +42,17 @@ impl Plugin for GamePlugin {
             .init_resource::<AdvanceOneFrameMode>()
             .init_resource::<DrawnHitboxCoordinates>()
             .add_state::<SimulationState>()
+            .add_event::<AnimationEnd>()
             .add_plugins(PlayerPlugin)
 
             .add_systems(OnEnter(AppState::Game), pause_simulation)
 
             .add_systems(
                 Update,
-                animate_sprite
-                
+                (
+                    event_handler,
+                    animate_sprite
+                )
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(SimulationState::Running))
 

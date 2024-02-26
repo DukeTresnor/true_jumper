@@ -5,13 +5,14 @@
 pub mod resources;
 mod systems;
 pub mod components;
+pub mod events;
 
 // Using
 use bevy::prelude::*;
 use crate::AppState;
 use systems::*;
 
-use self::resources::{PlayerSpriteSheetData, PlayerHitboxData};
+use self::{resources::{PlayerSpriteSheetData, PlayerHitboxData}, events::InputEvent};
 
 use super::{SimulationState, resources::DrawnHitboxCoordinates};
 
@@ -23,13 +24,15 @@ impl Plugin for PlayerPlugin {
             //.add_state::<AttackState>()
             .init_resource::<PlayerSpriteSheetData>()
             .init_resource::<PlayerHitboxData>()
+            .add_event::<InputEvent>()
             .add_systems(OnEnter(AppState::Game), populate_player_sprite_sheet_indeces.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), populate_player_hitbox_data.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), spawn_player)
             .add_systems(Update, 
                 (
                     input_handling,
-                    //move_player
+                    player_movement,
+                    player_attack,
                 )
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(SimulationState::Running))

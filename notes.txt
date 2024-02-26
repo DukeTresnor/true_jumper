@@ -62,3 +62,17 @@
         when entering paused, print out your available hotkeys so you don't get lost
     
     should try to implement event handling next
+
+2/23/24
+    how should i handle events?
+    ex: for animation, I have animate_sprite which loops through the current indeces, and sends an event to event_handler (maybe should be named
+        animation_event_handler).
+        when an animation ends, two things need to happen -- the indeces need to be reset to the idle indeces, and the character needs to return
+        to an idle state (ie its is_idle value needs to go back to true)
+            a third thing would be if a projectile ends -- in this case the projectile entity would need to be despawned
+        which function should do what?
+
+    might need to replace my current event handling strategy to accomodate events?
+        https://www.reddit.com/r/gamedev/comments/18xmm9/how_does_event_handling_work/
+        "Events are used to replace iterative state polling (checking the state of something over and over again)."
+        "If your game is coded as a loop of if-then statements you will have a hard time."

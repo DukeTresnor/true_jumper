@@ -16,6 +16,8 @@ use crate::game::components::*;
 use crate::game::player::components::*;
 use crate::game::systems::debug_json_read_write;
 
+
+use super::events::InputEvent;
 // use super::resources::*;
 use super::resources::PlayerSpriteSheetData;
 
@@ -152,6 +154,7 @@ pub fn spawn_player(
                 attack_bind: KeyCode::Space,
             },
             PlayerMovementState {
+                is_idle: true,
                 is_grounded: false,
                 is_walking: false,
                 is_dashing: false,
@@ -189,10 +192,15 @@ pub fn spawn_player(
     */
 }
 
+// don't have a mutable component get the boolean attached output from the keyboard_input resource, instead have
+//   a switch case to send events
+// Also have an event writer as one of the parameters
 pub fn input_handling(
     mut player_query: Query<(&mut PlayerInput, &InputBinding), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     // Controller input -- controller_input: Res<Input< Controller Code ?? >>,
+    mut input_event: EventWriter<InputEvent>,
+
 ) {
     for (mut player_input, input_binding) in player_query.iter_mut() {
         player_input.up = keyboard_input.pressed(input_binding.up_bind);
@@ -201,16 +209,48 @@ pub fn input_handling(
         player_input.right = keyboard_input.pressed(input_binding.right_bind);
         player_input.attack = keyboard_input.just_pressed(input_binding.attack_bind);
 
-        /* 
-        println!("player_inputs: {}", player_input.up);
-        println!("player_inputs: {}", player_input.down);
-        println!("player_inputs: {}", player_input.left);
-        println!("player_inputs: {}", player_input.right);
-        println!("player_inputs: {}", player_input.attack);
-        */
-    }   
+
+        // not sure if proper structure, can I use a switch case with match?
+        if keyboard_input.pressed(input_binding.up_bind) {
+            input_event.send(InputEvent::UpEvent);
+        }
+    
+        if keyboard_input.pressed(input_binding.down_bind) {
+            input_event.send(InputEvent::DownEvent);
+        }
+        
+        if keyboard_input.pressed(input_binding.left_bind) {
+            input_event.send(InputEvent::LeftEvent);
+        }
+
+        if keyboard_input.pressed(input_binding.right_bind) {
+            input_event.send(InputEvent::RightEvent);
+        }
+
+        if keyboard_input.just_pressed(input_binding.attack_bind) {
+            input_event.send(InputEvent::AttackButtonEvent);
+        }
+
+    }
+
+
+
+/*
+          // Also send an animation::end event
+                event_animation_end.send(AnimationEnd {
+                    starting_index: current_sprite_sheet_indices.current_first,
+                    ending_index: current_sprite_sheet_indices.current_last,
+                });
+
+
+*/
+
 
 }
+
+
+
+
 
 
 // constantly checks for the ending of an animation for an attack / projectile that comes from the player
@@ -220,32 +260,43 @@ pub fn despawn_children(
 
 }
 
-
-
 /* 
 pub fn move_player(
     mut player_query: Query<(Entity, &mut Transform, &PlayerInput, &mut PlayerMovementState), With<Player>>,
     mut event_writer: EventWriter<AnimationEvent>,
 ) {
     for (player_entity, mut player_transform, player_input, mut player_movement_state) in player_query.iter_mut() {
-    
         // move logic
-
-
         // sending event
-        event_writer.send(AnimationEvent("player_idle", player_entity));
-        
+        event_writer.send(AnimationEvent("player_idle", player_entity));   
     }
-
-
 }
 */
 
+pub fn player_movement(
+    mut player_query: Query<(&mut Transform, &mut PlayerMovementState), With<Player>>,
+    mut input_reader: EventReader<InputEvent>,
+) {
 
+    for event in input_reader.read() {
+        match event {
+            InputEvent::UpEvent=> println!("UpEvent"),
+            InputEvent::DownEvent=> println!("DownEvent"), 
+            InputEvent::LeftEvent=> println!("LeftEvent"), // <-- do stuff when left event is recieved --> move player to left
+            InputEvent::RightEvent=> println!("RightEvent"),
+            _=> {}
+        }
+    }
+
+}
 
 pub fn player_attack(
     // command <-- commands needed to spawn attack / projectile once appropriate input is detected and in proper state.
-    //   Might not do this way?
+    mut input_reader: EventReader<InputEvent>,
 ) {
-
+    for event in input_reader.read() {
+        if let Some(InputEvent::AttackButtonEvent) = Some(event) {
+            println!("Attack Button Event");
+        }
+    }
 }
