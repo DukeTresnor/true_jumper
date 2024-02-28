@@ -16,4 +16,5 @@ pub struct  AnimationStart {
 pub struct AnimationEnd {
     pub starting_index: usize,
     pub ending_index: usize,
+    pub is_looping: bool,
 }

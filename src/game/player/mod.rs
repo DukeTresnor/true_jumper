@@ -12,7 +12,7 @@ use bevy::prelude::*;
 use crate::AppState;
 use systems::*;
 
-use self::{resources::{PlayerSpriteSheetData, PlayerHitboxData}, events::InputEvent};
+use self::{events::{InputEvent, PlayerWalkingEvent}, resources::{PlayerHitboxData, PlayerSpriteSheetData}};
 
 use super::{SimulationState, resources::DrawnHitboxCoordinates};
 
@@ -20,11 +20,13 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
-            //.add_state::<MovementState>()
-            //.add_state::<AttackState>()
+            .add_state::<MovementState>()
+            .add_state::<AirState>()
+            .add_state::<AttackState>()
             .init_resource::<PlayerSpriteSheetData>()
             .init_resource::<PlayerHitboxData>()
             .add_event::<InputEvent>()
+            .add_event::<PlayerWalkingEvent>()
             .add_systems(OnEnter(AppState::Game), populate_player_sprite_sheet_indeces.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), populate_player_hitbox_data.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), spawn_player)
@@ -33,6 +35,7 @@ impl Plugin for PlayerPlugin {
                     input_handling,
                     player_movement,
                     player_attack,
+                    player_animation,
                 )
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(SimulationState::Running))
@@ -45,13 +48,21 @@ impl Plugin for PlayerPlugin {
 // .init_resource::<AdvanceOneFrameMode>()
 
 
-/*     Possibly use these in the future,  but for now keep state changes to things outside of the player, and use components for keeping track of what the player is doing
+//Possibly use these in the future,  but for now keep state changes to things outside of the player, and use components for keeping track of what the player is doing
 #[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
 pub enum MovementState {
     #[default]
     Idle,
     Walking,
     Dashing,
+    Falling,
+}
+
+#[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+pub enum AirState {
+    #[default]
+    Airborne,
+    Grounded,
 }
 
 #[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
@@ -60,4 +71,3 @@ pub enum AttackState {
     Neutral,
     Attacking
 }
-*/

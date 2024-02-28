@@ -22,3 +22,10 @@ pub enum InputEvent {
     RightEvent,
     AttackButtonEvent,
 }
+
+#[derive(Event)]
+pub struct PlayerWalkingEvent {
+    pub walking_direction: Vec3,
+}
+
+ 

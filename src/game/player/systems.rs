@@ -12,14 +12,15 @@ use serde::{Deserialize, Serialize};
 //use bevy_animations::*;
 use bevy::window::PrimaryWindow;
 //use bevy_animations::AnimationDirection;
-use crate::game::components::*;
+use crate::game::{components::*, AnimationEnd};
 use crate::game::player::components::*;
 use crate::game::systems::debug_json_read_write;
 
 
-use super::events::InputEvent;
+use super::events::*;
 // use super::resources::*;
 use super::resources::PlayerSpriteSheetData;
+use super::{AirState, MovementState};
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -165,6 +166,11 @@ pub fn spawn_player(
             },
             starting_sprite_sheet_indices,
             player_sprite_sheet_indices,
+            PlayerStats {
+                player_health: PLAYER_HEALTH,
+                player_horizontal_speed: PLAYER_HORIZONTAL_SPEED,
+                player_vertical_speed: PLAYER_VERTICAL_SPEED,
+            }
         )
     );
 
@@ -274,19 +280,61 @@ pub fn move_player(
 */
 
 pub fn player_movement(
-    mut player_query: Query<(&mut Transform, &mut PlayerMovementState), With<Player>>,
+    time: Res<Time>,
+    mut player_query: Query<(&mut Transform, &PlayerStats), With<Player>>,
+    mut animation_end_event_reader: EventReader<AnimationEnd>,
     mut input_reader: EventReader<InputEvent>,
+    mut player_walking_event_writer: EventWriter<PlayerWalkingEvent>,
+    movement_state: Res<State<MovementState>>,
+    mut next_movement_state: ResMut<NextState<MovementState>>,
+    air_state: Res<State<AirState>>,
 ) {
 
-    for event in input_reader.read() {
-        match event {
-            InputEvent::UpEvent=> println!("UpEvent"),
-            InputEvent::DownEvent=> println!("DownEvent"), 
-            InputEvent::LeftEvent=> println!("LeftEvent"), // <-- do stuff when left event is recieved --> move player to left
-            InputEvent::RightEvent=> println!("RightEvent"),
-            _=> {}
+    for (mut player_transform, player_stats) in player_query.iter_mut() {
+        for event in input_reader.read() {
+            let mut direction = Vec3::ZERO;
+            match event {
+                InputEvent::UpEvent=> {
+                    println!("UpEvent");
+                    if air_state.get() == &AirState::Grounded {
+                        // give some vertical force movement, send animation start event
+                    }
+                },
+                InputEvent::DownEvent=> println!("DownEvent"), 
+                InputEvent::LeftEvent=> {
+                    println!("LeftEvent");
+                    if (movement_state.get() == &MovementState::Idle) | (movement_state.get() == &MovementState::Walking) {
+                        // move player entity to the left
+                        direction += Vec3::new(-1.0, 0.0, 0.0);
+                        if direction.length() > 0.0 {
+                            direction = direction.normalize();
+                        }
+                        // transform.translation += direction * PLAYER_SPEED_HORIZONTAL * time.delta_seconds();
+                        player_transform.translation += direction * player_stats.player_horizontal_speed * time.delta_seconds();
+                        // set movement state to walking, but only if the player is not walking -- to not sent repetitive events
+                        if !(movement_state.get()  == &MovementState::Walking) {
+                            next_movement_state.set(MovementState::Walking);
+                        }
+                        // send walking event
+                        player_walking_event_writer.send(PlayerWalkingEvent{walking_direction: direction});
+                    }
+                }, // <-- do stuff when left event is recieved --> move player to left
+                InputEvent::RightEvent=> println!("RightEvent"),
+                _=> {}
+            }
+        }
+        
+
+        // portion of system to change state back to idle
+        for animation_end_event in animation_end_event_reader.read() {
+            // if the animation end event is a looping one, don't change state, but if it isn't looping, change back to idle
+            if !animation_end_event.is_looping {
+                next_movement_state.set(MovementState::Idle);
+            }
         }
     }
+
+
 
 }
 
@@ -298,5 +346,14 @@ pub fn player_attack(
         if let Some(InputEvent::AttackButtonEvent) = Some(event) {
             println!("Attack Button Event");
         }
+    }
+}
+
+
+pub fn player_animation(
+    mut player_walking_event_reader: EventReader<PlayerWalkingEvent>
+) {
+    for walking_event in player_walking_event_reader.read() {
+        println!("I'm walking");
     }
 }

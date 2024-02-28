@@ -91,7 +91,7 @@ pub fn toggle_simulation_state(
 pub fn animate_sprite(
     time: Res<Time>,
     mut animation_query: Query<(&CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
-    mut event_animation_end: EventWriter<AnimationEnd>,
+    mut animation_end_event_writer: EventWriter<AnimationEnd>,
 ) {
     for (current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas_sprite) in animation_query.iter_mut() {
         animation_timer.tick(time.delta());
@@ -103,20 +103,32 @@ pub fn animate_sprite(
                 // if you're walking, you should loop walking animation
                 if current_sprite_sheet_indices.looping {
                     texture_atlas_sprite.index = current_sprite_sheet_indices.current_first;
+
+
+                    // Also send an animation::end event
+                    animation_end_event_writer.send(AnimationEnd {
+                        starting_index: current_sprite_sheet_indices.current_first,
+                        ending_index: current_sprite_sheet_indices.current_last,
+                        is_looping: true,
+                    });
+
                 }
 
                 // if you're doing anything else, the end of an animation should bring you back to the idle animation
                 if !current_sprite_sheet_indices.looping {
                     // add what to do if the current animation is not a looping one -- we should go back to idle
                     texture_atlas_sprite.index = player_sprite_sheet_indices.idle_first;
+
+                    // Also send an animation::end event
+                    animation_end_event_writer.send(AnimationEnd {
+                        starting_index: current_sprite_sheet_indices.current_first,
+                        ending_index: current_sprite_sheet_indices.current_last,
+                        is_looping: false,
+                    });
                 }
                 
 
-                // Also send an animation::end event
-                event_animation_end.send(AnimationEnd {
-                    starting_index: current_sprite_sheet_indices.current_first,
-                    ending_index: current_sprite_sheet_indices.current_last,
-                });
+
 
             } else {
                 texture_atlas_sprite.index += 1;
@@ -128,6 +140,7 @@ pub fn animate_sprite(
 }
 
 
+// not necessary?
 // modify for animations?
 // for later -->  https://stackoverflow.com/questions/63675140/how-to-read-bevy-events-without-consuming-them
 //I just realized what I was doing wrong. I was using a single global resource EventReader to listen to
