@@ -12,7 +12,7 @@ use bevy::prelude::*;
 use crate::AppState;
 use systems::*;
 
-use self::{events::{InputEvent, PlayerWalkingEvent}, resources::{PlayerHitboxData, PlayerSpriteSheetData}};
+use self::{events::{InputEvent, PlayerAttackEvent, PlayerWalkingEvent}, resources::{PlayerHitboxData, PlayerSpriteSheetData}};
 
 use super::{SimulationState, resources::DrawnHitboxCoordinates};
 
@@ -27,6 +27,7 @@ impl Plugin for PlayerPlugin {
             .init_resource::<PlayerHitboxData>()
             .add_event::<InputEvent>()
             .add_event::<PlayerWalkingEvent>()
+            .add_event::<PlayerAttackEvent>()
             .add_systems(OnEnter(AppState::Game), populate_player_sprite_sheet_indeces.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), populate_player_hitbox_data.before(spawn_player))
             .add_systems(OnEnter(AppState::Game), spawn_player)
@@ -35,7 +36,7 @@ impl Plugin for PlayerPlugin {
                     input_handling,
                     player_movement,
                     player_attack,
-                    player_animation,
+                    player_animation_setter,
                 )
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(SimulationState::Running))

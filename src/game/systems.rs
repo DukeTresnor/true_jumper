@@ -86,31 +86,59 @@ pub fn toggle_simulation_state(
 
 }
 
+
+
+// logic isn't entirely right at the moment
 // CurrentSpriteSheetIndices
 // work on
 pub fn animate_sprite(
     time: Res<Time>,
-    mut animation_query: Query<(&CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut animation_query: Query<(&mut CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut animation_start_event_reader: EventReader<AnimationStart>,
     mut animation_end_event_writer: EventWriter<AnimationEnd>,
 ) {
-    for (current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas_sprite) in animation_query.iter_mut() {
+    for (mut current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas_sprite) in animation_query.iter_mut() {
+        
         animation_timer.tick(time.delta());
 
+        // If, when looping through events in the start event reader, if we come accross an animation start event, set the current sprite sheet indeces
+        for starting_animation_event in animation_start_event_reader.read() {
+            if let Some(animation_start_event) = Some(starting_animation_event) {
+                current_sprite_sheet_indices.current_first = animation_start_event.starting_index;
+                current_sprite_sheet_indices.current_last = animation_start_event.ending_index;
+                current_sprite_sheet_indices.looping = animation_start_event.is_looping;
+            }
+        }
+
+/*
+    for event in input_reader.read() {
+        if let Some(InputEvent::AttackButtonEvent) = Some(event) {
+            println!("Attack Button Event");
+            player_attacking_event_writer.send(PlayerAttackEvent);
+        }
+    }
+
+*/
+
+
         if animation_timer.just_finished() { // ie after every 1/60 seconds, ie after every frame
-            if texture_atlas_sprite.index == current_sprite_sheet_indices.current_last {
+            if texture_atlas_sprite.index == current_sprite_sheet_indices.current_last { // <-- if you're at the last index of your current animation
                 
                 
-                // if you're walking, you should loop walking animation
+                // if you're in an animation that loops, don't return to the idle animation
                 if current_sprite_sheet_indices.looping {
                     texture_atlas_sprite.index = current_sprite_sheet_indices.current_first;
 
 
-                    // Also send an animation::end event
+                    // Also send an animation::end event from the current animation
                     animation_end_event_writer.send(AnimationEnd {
                         starting_index: current_sprite_sheet_indices.current_first,
                         ending_index: current_sprite_sheet_indices.current_last,
                         is_looping: true,
                     });
+
+
+
 
                 }
 
@@ -125,10 +153,11 @@ pub fn animate_sprite(
                         ending_index: current_sprite_sheet_indices.current_last,
                         is_looping: false,
                     });
+
+                    println!("fn animate_sprite: works works works???");
+
+
                 }
-                
-
-
 
             } else {
                 texture_atlas_sprite.index += 1;

@@ -2,6 +2,7 @@
 
 
 use std::fs;
+use std::thread::current;
 
 use bevy::asset::io::file;
 use bevy::ecs::entity;
@@ -12,7 +13,7 @@ use serde::{Deserialize, Serialize};
 //use bevy_animations::*;
 use bevy::window::PrimaryWindow;
 //use bevy_animations::AnimationDirection;
-use crate::game::{components::*, AnimationEnd};
+use crate::game::{components::*, AnimationEnd, AnimationStart};
 use crate::game::player::components::*;
 use crate::game::systems::debug_json_read_write;
 
@@ -99,13 +100,11 @@ pub fn spawn_player(
 ) {
     let window = window_query.get_single().unwrap();
 
-
-
     let main_transform_player: Transform = Transform::from_xyz(window.width() / 4.0, window.height() / 2.0, 0.0);
     let texture_atlas = TextureAtlas::from_grid(
         asset_server.load("sprites/ball_blue_large_animation_sheet.png"),
         //Vec2::new(384.0, 80.0), 4, 1, None, None,
-        Vec2::new(96.0, 80.0), 12, 2, None, None,
+        Vec2::new(96.0, 80.0), 17, 2, None, None,
     );
 
     // Store other texture_atlas's here too
@@ -154,14 +153,14 @@ pub fn spawn_player(
                 right_bind: KeyCode::D,
                 attack_bind: KeyCode::Space,
             },
-            PlayerMovementState {
+            PlayerMovementState {                  // <-- this component I think is not necessary -- test removing it eventually
                 is_idle: true,
                 is_grounded: false,
                 is_walking: false,
                 is_dashing: false,
                 is_attacking: false,
             },
-            PlayerAttackState {
+            PlayerAttackState {                    // <-- same with this component
                 is_attacking: false,
             },
             starting_sprite_sheet_indices,
@@ -319,7 +318,24 @@ pub fn player_movement(
                         player_walking_event_writer.send(PlayerWalkingEvent{walking_direction: direction});
                     }
                 }, // <-- do stuff when left event is recieved --> move player to left
-                InputEvent::RightEvent=> println!("RightEvent"),
+                InputEvent::RightEvent=> {
+                    println!("RightEvent");
+                    if (movement_state.get() == &MovementState::Idle) | (movement_state.get() == &MovementState::Walking) {
+                        // move player entity to the left
+                        direction += Vec3::new(1.0, 0.0, 0.0);
+                        if direction.length() > 0.0 {
+                            direction = direction.normalize();
+                        }
+                        // transform.translation += direction * PLAYER_SPEED_HORIZONTAL * time.delta_seconds();
+                        player_transform.translation += direction * player_stats.player_horizontal_speed * time.delta_seconds();
+                        // set movement state to walking, but only if the player is not walking -- to not sent repetitive events
+                        if !(movement_state.get()  == &MovementState::Walking) {
+                            next_movement_state.set(MovementState::Walking);
+                        }
+                        // send walking event
+                        player_walking_event_writer.send(PlayerWalkingEvent{walking_direction: direction});
+                    }
+                },
                 _=> {}
             }
         }
@@ -341,19 +357,76 @@ pub fn player_movement(
 pub fn player_attack(
     // command <-- commands needed to spawn attack / projectile once appropriate input is detected and in proper state.
     mut input_reader: EventReader<InputEvent>,
+    mut player_attacking_event_writer: EventWriter<PlayerAttackEvent>,
 ) {
     for event in input_reader.read() {
         if let Some(InputEvent::AttackButtonEvent) = Some(event) {
             println!("Attack Button Event");
+            player_attacking_event_writer.send(PlayerAttackEvent);
         }
     }
 }
 
 
-pub fn player_animation(
-    mut player_walking_event_reader: EventReader<PlayerWalkingEvent>
+pub fn player_animation_setter(
+    mut player_query: Query<(&PlayerSpriteSheetIndices, &mut CurrentSpriteSheetIndices), With<Player>>,
+    mut player_walking_event_reader: EventReader<PlayerWalkingEvent>,
+    mut player_attacking_event_reader: EventReader<PlayerAttackEvent>,
+    mut animation_start_event_writer: EventWriter<AnimationStart>,
 ) {
-    for walking_event in player_walking_event_reader.read() {
-        println!("I'm walking");
+
+    for (player_sprite_sheet_indeces, mut current_sprite_sheet_indecs) in player_query.iter_mut() {
+        for walking_event in player_walking_event_reader.read() {
+            if let Some(player_walking_event) = Some(walking_event) {
+                
+                if player_walking_event.walking_direction.x == -1.0 {
+                    println!("I'm walking left");
+                }
+                
+                if player_walking_event.walking_direction.x == 1.0 {
+                    println!("I'm walking right");
+                }
+
+                /* send an animation start event for walking
+                animation_start_event_writer.send(
+                    AnimationStart {
+                        starting_index
+                        ending_index
+                        is_looping
+                    }
+                )                
+                 */
+
+
+            }
+
+            //use this for detecting if you're walking left or right in order to load the
+            //  proper animation --> println!("walking is: {}", walking_event.walking_direction)
+            // set animation indeces to values for walking
+        }
+
+        for attacking_event in player_attacking_event_reader.read() {
+            println!("I'm attacking");
+            // set your current indeces to the indeces meant for attacking -- attackFirst and attackLast
+            current_sprite_sheet_indecs.current_first = player_sprite_sheet_indeces.attack_first;
+            current_sprite_sheet_indecs.current_last = player_sprite_sheet_indeces.attack_last;
+            
+            //spawn a child entity using the attack animation sheet
+
+            // send an animation start event
+            //   right now is_looping should be set to something like player_sprite_sheet_indeces.attack_is_looping,
+            //     but I currently don't have that data present within the sprite sheet data...
+            animation_start_event_writer.send(
+                AnimationStart {
+                    starting_index: current_sprite_sheet_indecs.current_first,
+                    ending_index: current_sprite_sheet_indecs.current_last,
+                    is_looping: false,
+                }
+            );
+            println!("fn player_animation_setter: sdkfjnvbfvhbdjhbdhjdfbjhdfbsssssssssssssd");
+        }
     }
+
+
+
 }

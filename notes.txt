@@ -76,3 +76,7 @@
         https://www.reddit.com/r/gamedev/comments/18xmm9/how_does_event_handling_work/
         "Events are used to replace iterative state polling (checking the state of something over and over again)."
         "If your game is coded as a loop of if-then statements you will have a hard time."
+
+3/3/24
+    animations not setting back to idle, trying to do work with events in starting and ending animations
+    need to work out some issues and bugs, getting a grand overall map of how im sending my events should work ok

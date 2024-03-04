@@ -5,8 +5,8 @@ use bevy::prelude::*;
 // Temporary Constants -- add json file to supply this data later
 // ------ //
 pub const PLAYER_HEALTH: f32 = 10.0;
-pub const PLAYER_HORIZONTAL_SPEED: f32 = 1.0;
-pub const PLAYER_VERTICAL_SPEED: f32 = 1.0;
+pub const PLAYER_HORIZONTAL_SPEED: f32 = 10.0;
+pub const PLAYER_VERTICAL_SPEED: f32 = 10.0;
 
 
 // ------ //
@@ -53,6 +53,8 @@ pub struct PlayerAttackState {
 
 // --------- //
 
+
+
 #[derive(Component)]
 pub struct CurrentSpriteSheetIndices {
     pub current_first: usize,
@@ -60,6 +62,8 @@ pub struct CurrentSpriteSheetIndices {
     pub looping: bool,
 }
 
+// Components that store data from imported json file
+// -------- //
 #[derive(Component)]
 pub struct PlayerSpriteSheetIndices {
     pub idle_first: usize,
@@ -69,9 +73,12 @@ pub struct PlayerSpriteSheetIndices {
     // add more as you add animations to the spritesheet and the json file
 }
 
+// import logic not created yet, uses constants defined above
 #[derive(Component)]
 pub struct PlayerStats {
     pub player_health: f32,
     pub player_horizontal_speed: f32,
     pub player_vertical_speed: f32,
 }
+
+// -------- //

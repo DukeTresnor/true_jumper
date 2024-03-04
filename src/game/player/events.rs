@@ -28,4 +28,5 @@ pub struct PlayerWalkingEvent {
     pub walking_direction: Vec3,
 }
 
- 
+#[derive(Event)]
+pub struct PlayerAttackEvent; 
