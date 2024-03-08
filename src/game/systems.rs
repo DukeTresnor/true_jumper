@@ -53,12 +53,12 @@ pub fn pause_simulation(
 
 pub fn toggle_simulation_state(
     // needs access to keyboard input
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     // needs to have access to the current state, and needs to transition to another state
     simulation_state: Res<State<SimulationState>>,
     mut next_simulation_state: ResMut<NextState<SimulationState>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::P) {
+    if keyboard_input.just_pressed(KeyCode::KeyP) {
         if simulation_state.get() == &SimulationState::Paused {
             // Enter Running with set()
             next_simulation_state.set(SimulationState::Running);
@@ -71,7 +71,7 @@ pub fn toggle_simulation_state(
         }
     }
 
-    if keyboard_input.just_pressed(KeyCode::D) {
+    if keyboard_input.just_pressed(KeyCode::KeyD) {
         if simulation_state.get() == &SimulationState::Paused {
             // Enter Draw state
             next_simulation_state.set(SimulationState::Draw);
@@ -93,11 +93,11 @@ pub fn toggle_simulation_state(
 // work on
 pub fn animate_sprite(
     time: Res<Time>,
-    mut animation_query: Query<(&mut CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut animation_query: Query<(&mut CurrentSpriteSheetIndices, &PlayerSpriteSheetIndices, &mut AnimationTimer, &mut TextureAtlas)>,
     mut animation_start_event_reader: EventReader<AnimationStart>,
     mut animation_end_event_writer: EventWriter<AnimationEnd>,
 ) {
-    for (mut current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas_sprite) in animation_query.iter_mut() {
+    for (mut current_sprite_sheet_indices, player_sprite_sheet_indices, mut animation_timer, mut texture_atlas) in animation_query.iter_mut() {
         
         animation_timer.tick(time.delta());
 
@@ -122,12 +122,12 @@ pub fn animate_sprite(
 
 
         if animation_timer.just_finished() { // ie after every 1/60 seconds, ie after every frame
-            if texture_atlas_sprite.index == current_sprite_sheet_indices.current_last { // <-- if you're at the last index of your current animation
+            if texture_atlas.index == current_sprite_sheet_indices.current_last { // <-- if you're at the last index of your current animation
                 
                 
                 // if you're in an animation that loops, don't return to the idle animation
                 if current_sprite_sheet_indices.looping {
-                    texture_atlas_sprite.index = current_sprite_sheet_indices.current_first;
+                    texture_atlas.index = current_sprite_sheet_indices.current_first;
 
 
                     // Also send an animation::end event from the current animation
@@ -137,22 +137,26 @@ pub fn animate_sprite(
                         is_looping: true,
                     });
 
-
+                    println!("fn animate_sprite: texture_atlas_sprite.index: {}", texture_atlas.index);
 
 
                 }
 
                 // if you're doing anything else, the end of an animation should bring you back to the idle animation
                 if !current_sprite_sheet_indices.looping {
-                    // add what to do if the current animation is not a looping one -- we should go back to idle
-                    texture_atlas_sprite.index = player_sprite_sheet_indices.idle_first;
 
-                    // Also send an animation::end event
+                    // Send an animation::end event
                     animation_end_event_writer.send(AnimationEnd {
                         starting_index: current_sprite_sheet_indices.current_first,
                         ending_index: current_sprite_sheet_indices.current_last,
                         is_looping: false,
                     });
+
+                    // add what to do if the current animation is not a looping one -- we should go back to idle
+                    texture_atlas.index = player_sprite_sheet_indices.idle_first;
+                    current_sprite_sheet_indices.current_first = player_sprite_sheet_indices.idle_first;
+                    current_sprite_sheet_indices.current_last = player_sprite_sheet_indices.idle_last;
+                    current_sprite_sheet_indices.looping = false;
 
                     println!("fn animate_sprite: works works works???");
 
@@ -160,7 +164,7 @@ pub fn animate_sprite(
                 }
 
             } else {
-                texture_atlas_sprite.index += 1;
+                texture_atlas.index += 1;
 
                 //println!("fn animate_sprite: current index: {}", texture_atlas_sprite.index);
             }
@@ -195,12 +199,12 @@ pub fn event_handler(
 
 pub fn advance_one_frame(
     mut advance_one_frame_mode: ResMut<AdvanceOneFrameMode>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     simulation_state: Res<State<SimulationState>>,
     mut next_simulation_state: ResMut<NextState<SimulationState>>,
 ) {
     if simulation_state.get() == &SimulationState::Paused {
-        if keyboard_input.just_pressed(KeyCode::Z) {
+        if keyboard_input.just_pressed(KeyCode::KeyZ) {
             advance_one_frame_mode.should_advance_one_frame = true; 
             next_simulation_state.set(SimulationState::Running);
             println!("Advance kjnfkjdfn");
@@ -215,13 +219,13 @@ pub fn advance_one_frame(
 
 // Refine, rename
 pub fn debug_json_read_write(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     simulation_state: Res<State<SimulationState>>,
     asset_server: Res<AssetServer>,
 
 ) {
     if simulation_state.get() == &SimulationState::Paused {
-        if keyboard_input.just_pressed(KeyCode::X) {
+        if keyboard_input.just_pressed(KeyCode::KeyX) {
             
             // load json data into a string
             let data = fs::read_to_string("/Users/bradfordarmstrong/Projects/rust_space/bevy_games/true_jumper/src/game/json_test.json")
@@ -248,7 +252,7 @@ pub fn debug_json_read_write(
 // needs to send an event
 pub fn draw_hitbox(
     cursor_coordinates: Res<MouseCursorWorldCoordinates>,
-    mouse_input: Res<Input<MouseButton>>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
     mut drawn_hitbox_coordinates: ResMut<DrawnHitboxCoordinates>,
     player_query: Query<&Transform, With<Player>>,
 ) {
@@ -289,10 +293,10 @@ pub fn debug_display_game_resources(
     simulation_state: Res<State<SimulationState>>,
     advance_one_frame_resource: Res<AdvanceOneFrameMode>,
     drawn_hitbox_coordinates: Res<DrawnHitboxCoordinates>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if simulation_state.get() == &SimulationState::Paused {
-        if keyboard_input.just_pressed(KeyCode::L) {
+        if keyboard_input.just_pressed(KeyCode::KeyL) {
             println!("fn debug_display_game_resources: should_advance_one_frame: {}, frame_timer: {:?}", advance_one_frame_resource.should_advance_one_frame, advance_one_frame_resource.frame_timer);
             println!("fn debug_display_game_resources: starting_coordinates: {}, ending_coordinates: {}, starting_coordinates_relative_to_player: {}, ending_coordinates_relative_to_player: {}", 
                 drawn_hitbox_coordinates.starting_coordinates, 

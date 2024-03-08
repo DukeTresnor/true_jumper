@@ -94,21 +94,19 @@ pub fn spawn_player(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     player_sprite_sheet_data: Res<PlayerSpriteSheetData>,
     //mut animations: ResMut<Animations>,
 ) {
     let window = window_query.get_single().unwrap();
-
+    let loaded_texture = asset_server.load("sprites/ball_blue_large_animation_sheet.png");
     let main_transform_player: Transform = Transform::from_xyz(window.width() / 4.0, window.height() / 2.0, 0.0);
-    let texture_atlas = TextureAtlas::from_grid(
-        asset_server.load("sprites/ball_blue_large_animation_sheet.png"),
-        //Vec2::new(384.0, 80.0), 4, 1, None, None,
+    let texture_atlas = TextureAtlasLayout::from_grid(
         Vec2::new(96.0, 80.0), 17, 2, None, None,
     );
 
     // Store other texture_atlas's here too
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let texture_atlas_layouts_handle = texture_atlas_layouts.add(texture_atlas);
     //let cloned_texture_atlas_handle = texture_atlas_handle.clone();
     //let idle_animation_indeces = AnimationIndices { first: 0, last: 3 };
 
@@ -133,8 +131,12 @@ pub fn spawn_player(
         (
             SpriteSheetBundle {
                 transform: main_transform_player,
-                texture_atlas: texture_atlas_handle,
-                sprite: TextureAtlasSprite::new(starting_sprite_sheet_indices.current_first),
+                texture: loaded_texture,
+                atlas: TextureAtlas {
+                    layout: texture_atlas_layouts_handle,
+                    index: 0
+                },
+                //sprite: TextureAtlasSprite::new(starting_sprite_sheet_indices.current_first),
                 ..default()
             },
             AnimationTimer(Timer::from_seconds(1.0 / 60.0, TimerMode::Repeating)),
@@ -147,10 +149,10 @@ pub fn spawn_player(
                 attack: false,
             },
             InputBinding {
-                up_bind: KeyCode::W,
-                down_bind: KeyCode::S,
-                left_bind: KeyCode::A,
-                right_bind: KeyCode::D,
+                up_bind: KeyCode::KeyW,
+                down_bind: KeyCode::KeyS,
+                left_bind: KeyCode::KeyA,
+                right_bind: KeyCode::KeyD,
                 attack_bind: KeyCode::Space,
             },
             PlayerMovementState {                  // <-- this component I think is not necessary -- test removing it eventually
@@ -202,7 +204,7 @@ pub fn spawn_player(
 // Also have an event writer as one of the parameters
 pub fn input_handling(
     mut player_query: Query<(&mut PlayerInput, &InputBinding), With<Player>>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     // Controller input -- controller_input: Res<Input< Controller Code ?? >>,
     mut input_event: EventWriter<InputEvent>,
 
@@ -356,35 +358,66 @@ pub fn player_movement(
 
 pub fn player_attack(
     // command <-- commands needed to spawn attack / projectile once appropriate input is detected and in proper state.
+    mut player_query: Query<&mut PlayerAttackState, With<Player>>,
     mut input_reader: EventReader<InputEvent>,
-    mut player_attacking_event_writer: EventWriter<PlayerAttackEvent>,
+    mut player_attack_event_writer: EventWriter<PlayerAttackEvent>,
+    mut animation_end_event_reader: EventReader<AnimationEnd>,
 ) {
-    for event in input_reader.read() {
-        if let Some(InputEvent::AttackButtonEvent) = Some(event) {
-            println!("Attack Button Event");
-            player_attacking_event_writer.send(PlayerAttackEvent);
+
+    for mut player_attack_state in player_query.iter_mut() {
+        for event in input_reader.read() {
+            if let Some(InputEvent::AttackButtonEvent) = Some(event) {
+                println!("Attack Button Event");
+                player_attack_event_writer.send(PlayerAttackEvent);
+
+                // switch player state to attacking
+                if !player_attack_state.is_attacking {
+                    player_attack_state.is_attacking = true;
+                }
+
+            }
         }
+
+        // When an animation ends, if we're in an attacking state, exit the attacking state
+        for animation_end_event in animation_end_event_reader.read() {
+            if let Some(real_animation_end_event) = Some(animation_end_event) {
+                if player_attack_state.is_attacking {
+                    println!("fn player_attack: Attack animation event ended");
+                    player_attack_state.is_attacking = false;
+                }
+
+
+
+
+            }
+        }
+
     }
+
 }
 
 
 pub fn player_animation_setter(
-    mut player_query: Query<(&PlayerSpriteSheetIndices, &mut CurrentSpriteSheetIndices), With<Player>>,
+    mut player_query: Query<(&PlayerSpriteSheetIndices, &mut CurrentSpriteSheetIndices, &PlayerAttackState), With<Player>>,
     mut player_walking_event_reader: EventReader<PlayerWalkingEvent>,
     mut player_attacking_event_reader: EventReader<PlayerAttackEvent>,
     mut animation_start_event_writer: EventWriter<AnimationStart>,
 ) {
 
-    for (player_sprite_sheet_indeces, mut current_sprite_sheet_indecs) in player_query.iter_mut() {
+
+    for (player_sprite_sheet_indeces, mut current_sprite_sheet_indecs, player_attack_state) in player_query.iter_mut() {
+        // Process walking
         for walking_event in player_walking_event_reader.read() {
             if let Some(player_walking_event) = Some(walking_event) {
                 
                 if player_walking_event.walking_direction.x == -1.0 {
                     println!("I'm walking left");
+                    // send an animation start event for walking left
                 }
                 
                 if player_walking_event.walking_direction.x == 1.0 {
                     println!("I'm walking right");
+                    // send an animation start event for walking right
                 }
 
                 /* send an animation start event for walking
@@ -405,7 +438,9 @@ pub fn player_animation_setter(
             // set animation indeces to values for walking
         }
 
+        // Process attacking
         for attacking_event in player_attacking_event_reader.read() {
+
             println!("I'm attacking");
             // set your current indeces to the indeces meant for attacking -- attackFirst and attackLast
             current_sprite_sheet_indecs.current_first = player_sprite_sheet_indeces.attack_first;

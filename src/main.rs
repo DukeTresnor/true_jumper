@@ -16,7 +16,7 @@ fn main() {
     App::new()
         .init_resource::<MouseCursorWorldCoordinates>()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_state::<AppState>()
+        .init_state::<AppState>()
         .add_plugins(MainMenuPlugin)
         .add_plugins(GamePlugin)
         .add_systems(Startup, spawn_camera)

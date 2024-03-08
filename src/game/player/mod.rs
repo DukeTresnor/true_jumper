@@ -20,9 +20,9 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_state::<MovementState>()
-            .add_state::<AirState>()
-            .add_state::<AttackState>()
+            .init_state::<MovementState>()
+            .init_state::<AirState>()
+            .init_state::<AttackState>()
             .init_resource::<PlayerSpriteSheetData>()
             .init_resource::<PlayerHitboxData>()
             .add_event::<InputEvent>()

@@ -41,7 +41,7 @@ impl Plugin for GamePlugin {
             //})
             .init_resource::<AdvanceOneFrameMode>()
             .init_resource::<DrawnHitboxCoordinates>()
-            .add_state::<SimulationState>()
+            .init_state::<SimulationState>()
             .add_event::<AnimationStart>()
             .add_event::<AnimationEnd>()
             .add_plugins(PlayerPlugin)

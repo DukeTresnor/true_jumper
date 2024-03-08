@@ -80,7 +80,7 @@ pub fn build_main_menu(
                                 }
                             )
                         ],
-                        alignment: TextAlignment::Center,
+                        justify: JustifyText::Center,
                         ..default()
                     },
                     ..default()
@@ -124,7 +124,7 @@ pub fn build_main_menu(
                                 }
                             )
                         ],
-                        alignment: TextAlignment::Center,
+                        justify: JustifyText::Center,
                         ..default()
                     },
                     ..default()
@@ -162,7 +162,7 @@ pub fn build_main_menu(
                                 }
                             )
                         ],
-                        alignment: TextAlignment::Center,
+                        justify: JustifyText::Center,
                         ..default()
                     },
                     ..default()

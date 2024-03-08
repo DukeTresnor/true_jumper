@@ -20,7 +20,7 @@ pub struct MainMenuPlugin;
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_state::<MainMenuState>()
+            .init_state::<MainMenuState>()
             .add_systems(OnEnter(AppState::MainMenu), spawn_main_menu)
             .add_systems(Update, interaction_button)
             .add_systems(OnExit(AppState::MainMenu), despawn_main_menu)

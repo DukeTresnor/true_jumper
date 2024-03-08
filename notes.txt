@@ -80,3 +80,14 @@
 3/3/24
     animations not setting back to idle, trying to do work with events in starting and ending animations
     need to work out some issues and bugs, getting a grand overall map of how im sending my events should work ok
+
+3/4/24
+    currently I think I need to add some state conditions for the player in order to properly control the index changes for animations
+
+3/5/24
+    need to go through code and make changes to account for bevy update to version 0.13
+        lots of edits needed for texture atlases
+
+3/7/24
+    not sure about player/systems spawn_player() --> SpriteSheetBundle's implementation
+        look into this
