@@ -3,7 +3,8 @@
 use std::fs;
 use std::thread::current;
 
-use bevy::{prelude::*, animation};
+use bevy::{animation, prelude::*, transform};
+use bevy::window::PrimaryWindow;
 use serde_json::{Result, Value};
 use serde::{Deserialize, Serialize};
 
@@ -87,6 +88,29 @@ pub fn toggle_simulation_state(
 }
 
 
+pub fn level_loader(
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    asset_server: Res<AssetServer>,
+    // add something for the csv file
+) {
+    let window = window_query.get_single().unwrap();
+    let loaded_texture: Handle<Image> = asset_server.load("tile-based-game/simplified/level_0/Walls.png");
+    let level_transform: Transform = Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0);
+
+
+    let level_entity = commands.spawn(
+        SpriteBundle {
+            transform: level_transform,
+            texture: loaded_texture,
+            ..default()
+        }
+        // needs more components to process the csv file
+    );
+
+    // add code to process the csv file /\ /\ look up to the spawn command?
+}
+
 
 // logic isn't entirely right at the moment
 // CurrentSpriteSheetIndices
@@ -143,6 +167,7 @@ pub fn animate_sprite(
                 }
 
                 // if you're doing anything else, the end of an animation should bring you back to the idle animation
+                // this continually runs, figure out?
                 if !current_sprite_sheet_indices.looping {
 
                     // Send an animation::end event
@@ -158,6 +183,7 @@ pub fn animate_sprite(
                     current_sprite_sheet_indices.current_last = player_sprite_sheet_indices.idle_last;
                     current_sprite_sheet_indices.looping = false;
 
+                
                     println!("fn animate_sprite: works works works???");
 
 

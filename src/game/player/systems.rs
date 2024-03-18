@@ -100,7 +100,7 @@ pub fn spawn_player(
 ) {
     let window = window_query.get_single().unwrap();
     let loaded_texture = asset_server.load("sprites/ball_blue_large_animation_sheet.png");
-    let main_transform_player: Transform = Transform::from_xyz(window.width() / 4.0, window.height() / 2.0, 0.0);
+    let main_transform_player: Transform = Transform::from_xyz(window.width() / 4.0, window.height() / 2.0, 0.1);
     let texture_atlas = TextureAtlasLayout::from_grid(
         Vec2::new(96.0, 80.0), 17, 2, None, None,
     );
@@ -198,6 +198,20 @@ pub fn spawn_player(
     );
     */
 }
+
+pub fn despawn_player(
+    mut commands: Commands,
+    player_query: Query<Entity, With<Player>>,
+    //player_query: Query<(Entity, &Player)>,
+) {
+    // If player_entity exists because the player_query contains some entity with the Player component,
+    //   we want to despawn that player entity with commands
+    //if let Ok(player_entity) = player_query.get_single() {
+    for player_entity in player_query.iter() {
+        commands.entity(player_entity).despawn()
+    }
+}
+
 
 // don't have a mutable component get the boolean attached output from the keyboard_input resource, instead have
 //   a switch case to send events

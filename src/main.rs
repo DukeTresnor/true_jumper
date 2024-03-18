@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+//use bevy_ecs_ldtk::prelude::*;
 //use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use game::GamePlugin;
 use main_menu::MainMenuPlugin;
@@ -12,10 +13,14 @@ mod systems;
 mod components;
 mod resources;
 
+
+
+
 fn main() {
     App::new()
         .init_resource::<MouseCursorWorldCoordinates>()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        //.add_plugins(LdtkPlugin)
         .init_state::<AppState>()
         .add_plugins(MainMenuPlugin)
         .add_plugins(GamePlugin)

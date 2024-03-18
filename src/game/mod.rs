@@ -39,6 +39,7 @@ impl Plugin for GamePlugin {
             //.add_plugins(AnimationsPlugin {
             //    pixels_per_meter: 20.
             //})
+            // .add_systems(OnEnter(AppState::Game), populate_player_hitbox_data.before(spawn_player))
             .init_resource::<AdvanceOneFrameMode>()
             .init_resource::<DrawnHitboxCoordinates>()
             .init_state::<SimulationState>()
@@ -47,6 +48,7 @@ impl Plugin for GamePlugin {
             .add_plugins(PlayerPlugin)
 
             .add_systems(OnEnter(AppState::Game), pause_simulation)
+            .add_systems(OnEnter(AppState::Game), level_loader )
 
             .add_systems(
                 Update,

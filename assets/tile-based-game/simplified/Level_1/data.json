@@ -1,0 +1,42 @@
+{
+	"identifier": "Level_1",
+	"uniqueIdentifer": "9e2de1e0-d7b0-11ee-945a-6fb9c8639d70",
+	"x": -1,
+	"y": -1,
+	"width": 256,
+	"height": 256,
+	"bgColor": "#696A79",
+	"neighbourLevels": [],
+	"customFields" : {},
+	"layers": [
+		"Walls.png"
+	],
+	"entities": {
+		"Goal": [
+			{
+				"id": "Goal",
+				"iid": "c60b6b10-d7b0-11ee-945a-c1cb3f98d707",
+				"layer": "Entities",
+				"x": 108,
+				"y": 144,
+				"width": 16,
+				"height": 16,
+				"color": 14120515,
+				"customFields" : {}
+			}
+		],
+		"Player": [
+			{
+				"id": "Player",
+				"iid": "c7df40b0-d7b0-11ee-945a-4114b3ece1a5",
+				"layer": "Entities",
+				"x": 90,
+				"y": 234,
+				"width": 64,
+				"height": 64,
+				"color": 12470831,
+				"customFields" : {}
+			}
+		]
+	}
+}
