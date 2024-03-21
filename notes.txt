@@ -91,3 +91,28 @@
 3/7/24
     not sure about player/systems spawn_player() --> SpriteSheetBundle's implementation
         look into this
+
+3/20/24
+    adding linear interpolation between camera and player? Not sure this will work even through bug fixes
+    this is a part of the goal of adding levels, and trying to get the right size for the levels themselves.
+        need to incorporate csv file info too, and have it match up with the level image
+
+    got it to work!
+        speed and feel can be adjusted later
+        might also need to turn off the system for now
+    
+    player can move as far left or right as possible -- no barrier to window size?
+
+    we want the size of level image to account for the pixel size of the player, then we want to restrict the player's movement
+        to be within the bounds set by the csv file
+            game / systems 
+                pub function level bounds
+                    player query --> to resritct player movement -- follow jumper's implementation
+                    level resource --> a resource that contains the level information. Hopefully this also has the info for the csv file, as well as the four bounds 
+                        that it describes
+                    restrict the player's movement based on these bounds
+        tasks
+            match player size to level size -- standardize
+            access data from csv file 
+            implement bounds set by the csv file
+            make sure csv bounds match visually with the level image

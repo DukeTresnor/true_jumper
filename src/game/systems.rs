@@ -8,6 +8,7 @@ use bevy::window::PrimaryWindow;
 use serde_json::{Result, Value};
 use serde::{Deserialize, Serialize};
 
+use crate::components::MyGameCamera;
 use crate::game::SimulationState;
 use crate::game::resources::AdvanceOneFrameMode;
 use crate::resources::MouseCursorWorldCoordinates;
@@ -112,6 +113,42 @@ pub fn level_loader(
 }
 
 
+
+/*
+pub fn spawn_camera(
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+) {
+    let window = window_query.get_single().unwrap();
+
+    commands.spawn(
+        (
+            Camera2dBundle {
+                transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 500.0),
+                ..default()
+            },
+            MyGameCamera {},
+        )
+    );
+}
+*/
+
+// system for the camera to follow the player
+pub fn camera_follow_player(
+    mut camera_query: Query<&mut Transform, (With<MyGameCamera>, Without<Player>)>,
+    player_query: Query<&Transform, (With<Player>, Without<MyGameCamera>)>,
+) {
+    let scale_factor: f32 = 0.1;
+    for mut camera_transform in camera_query.iter_mut() {
+        for player_transform in player_query.iter() {
+            let cloned_camera_transform_translation = camera_transform.translation.clone();
+            camera_transform.translation += (player_transform.translation - cloned_camera_transform_translation) * scale_factor;
+        }
+    }
+}
+
+
+
 // logic isn't entirely right at the moment
 // CurrentSpriteSheetIndices
 // work on
@@ -184,7 +221,7 @@ pub fn animate_sprite(
                     current_sprite_sheet_indices.looping = false;
 
                 
-                    println!("fn animate_sprite: works works works???");
+                    //println!("fn animate_sprite: works works works???");
 
 
                 }

@@ -54,7 +54,8 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     event_handler,
-                    animate_sprite
+                    animate_sprite,
+                    camera_follow_player,
                 )
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(SimulationState::Running))

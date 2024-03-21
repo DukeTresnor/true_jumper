@@ -472,7 +472,7 @@ pub fn player_animation_setter(
                     is_looping: false,
                 }
             );
-            println!("fn player_animation_setter: sdkfjnvbfvhbdjhbdhjdfbjhdfbsssssssssssssd");
+            //println!("fn player_animation_setter: sdkfjnvbfvhbdjhbdhjdfbjhdfbsssssssssssssd");
         }
     }
 
