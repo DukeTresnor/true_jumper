@@ -97,7 +97,10 @@ pub fn level_loader(
 ) {
     let window = window_query.get_single().unwrap();
     let loaded_texture: Handle<Image> = asset_server.load("tile-based-game/simplified/level_0/Walls.png");
-    let level_transform: Transform = Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0);
+    //let level_transform: Transform = Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0);
+    let level_transform: Transform = Transform::from_xyz(window.width(), window.height(), 1.0);
+    
+    //println!("fn level_loader filepath: {:?}", loaded_texture.path());
 
 
     let level_entity = commands.spawn(
@@ -329,12 +332,12 @@ pub fn draw_hitbox(
         drawn_hitbox_coordinates.ending_coordinates.x = cursor_coordinates.0.x;
         drawn_hitbox_coordinates.ending_coordinates.y = cursor_coordinates.0.y;
 
-        //println!("fn draw_hitbox: starting_box_coordinates x: {}, starting_box_coordinates y: {}", drawn_hitbox_coordinates.starting_coordinates.x, drawn_hitbox_coordinates.starting_coordinates.y);
+        println!("fn draw_hitbox: starting_box_coordinates x: {}, starting_box_coordinates y: {}", drawn_hitbox_coordinates.starting_coordinates.x, drawn_hitbox_coordinates.starting_coordinates.y);
         //println!("fn draw_hitbox: ending_box_coordinates x: {}, ending_box_coordinates y: {}", drawn_hitbox_coordinates.ending_coordinates.x, drawn_hitbox_coordinates.ending_coordinates.y);
     
 
         for player_transform in player_query.iter() {
-            println!("fn draw_hitbox: player_transform: x_coordinate: {}, y_coordinate: {}", player_transform.translation.x, player_transform.translation.y);
+            //println!("fn draw_hitbox: player_transform: x_coordinate: {}, y_coordinate: {}", player_transform.translation.x, player_transform.translation.y);
         
             // calculate the x and y coordinates of the starting and ending positions of the drawn hitboxes relative to the player's position
             drawn_hitbox_coordinates.starting_coordinates_relative_to_player.x = drawn_hitbox_coordinates.starting_coordinates.x - player_transform.translation.x;

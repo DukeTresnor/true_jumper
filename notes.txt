@@ -116,3 +116,16 @@
             access data from csv file 
             implement bounds set by the csv file
             make sure csv bounds match visually with the level image
+
+3/23/24
+    I think I have the tile sizes right, I just need to import the csv file
+        "let loaded_texture: Handle<Image> = asset_server.load("tile-based-game/simplified/level_0/Walls.png");"
+        "let level_transform: Transform = Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0);"
+        these are the lines that load my level image. I think I want to have its transform be set not from the center of the window, but instead
+            set at the upper left corner of the backgound
+                set at the lower left corner of the background?
+    
+    walls.png size current 
+        1714 x 994 --> matches size of level in ldtk editor
+        if I can the length and width of th handle<image>, I can spawn it according to the difference of the absolute valeu of othe difference of two others.
+        work on -- really tired

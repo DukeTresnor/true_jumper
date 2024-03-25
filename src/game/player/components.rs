@@ -5,7 +5,7 @@ use bevy::prelude::*;
 // Temporary Constants -- add json file to supply this data later
 // ------ //
 pub const PLAYER_HEALTH: f32 = 10.0;
-pub const PLAYER_HORIZONTAL_SPEED: f32 = 50.0;
+pub const PLAYER_HORIZONTAL_SPEED: f32 = 150.0;
 pub const PLAYER_VERTICAL_SPEED: f32 = 10.0;
 
 
