@@ -34,6 +34,7 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, 
                 (
                     input_handling,
+                    temp_up_down_move_player,
                     player_movement,
                     player_attack,
                     player_animation_setter,

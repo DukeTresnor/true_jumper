@@ -129,3 +129,25 @@
         1714 x 994 --> matches size of level in ldtk editor
         if I can the length and width of th handle<image>, I can spawn it according to the difference of the absolute valeu of othe difference of two others.
         work on -- really tired
+
+3/29/24
+    to make the level's lower left corner to match the window's lower left corner (about), 
+        set the level_transform's x and y values to the width and height of the level's dimensions / 2.0 <-- extract from json file
+        (level_width / 2.0, level_height / 2.0, 0.0) <-- this is your structure I think!
+
+    Next steps
+        incorporate csv level file into collisions and make it match with your level png
+            load csv as an asset into a matrix / data structure
+            when checking for collisions,
+                get level grid size (currently 18)
+                loop through csv matrix and multiply row, col information by 18
+                if csv matrix has a 1 value, check this new (x, y) pair against the player position for collisions
+            essentially
+                load csv file, acquire values into a matrix
+                loop through matrix; whenever a 1 is found, multiply the cell's row and column info by the level's grid size. These two values are the x, y position of a block inside
+                    the game itself
+                check collisions against these (x, y) coordinate pairs
+
+4/6/24
+    issue with performance? Big lag
+    

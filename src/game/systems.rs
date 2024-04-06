@@ -98,7 +98,9 @@ pub fn level_loader(
     let window = window_query.get_single().unwrap();
     let loaded_texture: Handle<Image> = asset_server.load("tile-based-game/simplified/level_0/Walls.png");
     //let level_transform: Transform = Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0);
-    let level_transform: Transform = Transform::from_xyz(window.width(), window.height(), 1.0);
+    //let level_transform: Transform = Transform::from_xyz(window.width(), window.height(), 0.0);
+    let level_transform: Transform = Transform::from_xyz(1714.0 / 2.0, 994.0 / 2.0, 0.0);
+        // --> set these to width and height of the level's dimensions / 2.0 <-- extract from json file
     
     //println!("fn level_loader filepath: {:?}", loaded_texture.path());
 

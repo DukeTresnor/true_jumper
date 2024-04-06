@@ -1,7 +1,7 @@
 // game / player / systems.rs
 
 
-use std::fs;
+use std::{default, fs};
 use std::thread::current;
 
 use bevy::asset::io::file;
@@ -293,6 +293,37 @@ pub fn move_player(
     }
 }
 */
+
+// ---- DELETE ---- //
+pub fn temp_up_down_move_player(
+    time: Res<Time>,
+    mut player_query: Query<(&mut Transform, &PlayerStats), With<Player>>,
+    mut input_reader: EventReader<InputEvent>,
+) {
+    for (mut player_transform, player_stats) in player_query.iter_mut() {
+        for event in input_reader.read() {
+            let mut direction = Vec3::ZERO;
+            match event {
+                InputEvent::UpEvent => {
+                    direction += Vec3::new(0.0, 1.0, 0.0);
+                    if direction.length() > 0.0 {
+                        direction = direction.normalize();
+                    }
+                    player_transform.translation += direction * player_stats.player_horizontal_speed * time.delta_seconds();
+                },
+                InputEvent::DownEvent => {
+                    direction += Vec3::new(0.0, -11.0, 0.0);
+                    if direction.length() > 0.0 {
+                        direction = direction.normalize();
+                    }
+                    player_transform.translation += direction * player_stats.player_horizontal_speed * time.delta_seconds();
+                },
+                _=> {}
+            }
+        }
+    }
+}
+// ---- DELETE ---- //
 
 pub fn player_movement(
     time: Res<Time>,
