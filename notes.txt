@@ -150,4 +150,16 @@
 
 4/6/24
     issue with performance? Big lag
-    
+
+4/7/24
+    create a level_manager module inside game/, move level_loader system from game/systems.rs, into game/level_manager/systems.rs
+        level_manager plugin needs to be added to game/mod.rs
+        level_manager plugin needs -- game/level_manager/ 
+            mod.rs
+            systems.rs
+            components.rs
+            resources.rs
+            events.rs
+
+    add 2d_collision crate to project
+    have collision systems in game/systems.rs and CollisionType components in game/components.rs, or put both in a collisions modlue?

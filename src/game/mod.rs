@@ -10,14 +10,15 @@
 pub mod resources;
 mod systems;
 mod components;
-pub mod player;
 pub mod events;
-
+pub mod level_loader;
+pub mod player;
 
 // Using
 use bevy::prelude::*;
 use crate::AppState;
 use player::PlayerPlugin;
+use level_loader::LevelLoaderPlugin;
 
 
 use self::{systems::*, resources::*, events::*};
@@ -46,9 +47,9 @@ impl Plugin for GamePlugin {
             .add_event::<AnimationStart>()
             .add_event::<AnimationEnd>()
             .add_plugins(PlayerPlugin)
-
+            .add_plugins(LevelLoaderPlugin)
             .add_systems(OnEnter(AppState::Game), pause_simulation)
-            .add_systems(OnEnter(AppState::Game), level_loader )
+            //.add_systems(OnEnter(AppState::Game), level_loader )
 
             .add_systems(
                 Update,
