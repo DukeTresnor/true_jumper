@@ -163,3 +163,36 @@
 
     add 2d_collision crate to project
     have collision systems in game/systems.rs and CollisionType components in game/components.rs, or put both in a collisions modlue?
+
+4/18/24
+    worked on loading level data from a csv file
+        I can print out the String Records from the csv file, but I get an error when trying to unwrap
+            the last / last 2 rows in the csv file
+            Does this mean that there's an error in the csv file?
+            Solved the error -- I needed a comma at the end
+                make sure to add this whenever you change or add a level using the
+                    ldtk level editor?
+
+    next task, I need to store several parameters into a resource
+        create the resource with the right formatting
+        store the number of rows in the csv file
+            this should come from the loop through rdr in level_setup
+            ie it should be the number of StringRecords
+        store the number of columns in the csv file
+            this should come from the loop through record in level_setup
+            ie it should be the number of values inside each StringRecord
+                don't count the last column that's empty?
+        store the value contained in a "cell" into your level_values parameter
+        just make two counting variables?
+        structure for Level Resource:
+            level_values: Vec<[f32, f32]>,
+            rows: i32,
+            columns: i32,
+        I'm not sure of this, I think it needs more...
+        But, I made some progress!
+
+4/24/24
+    worked on loading level data again
+    got the blocks to spawn according to the csv file! Sort of -- there's still
+        some issues, namely not all of the blocks in the level are being spawned,
+        probably has to do with the exact numbers involved

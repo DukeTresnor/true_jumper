@@ -20,6 +20,8 @@ pub struct LevelLoaderPlugin;
 impl Plugin for LevelLoaderPlugin {
     fn build(&self, app:&mut App) {
         app
+            .init_resource::<LevelData>()
+            .add_systems(OnEnter(AppState::MainMenu), level_setup) // <temp fix, order these two systems properly
             .add_systems(OnEnter(AppState::Game), level_loader)
         
             ;
